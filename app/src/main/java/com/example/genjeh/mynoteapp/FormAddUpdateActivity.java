@@ -1,11 +1,15 @@
 package com.example.genjeh.mynoteapp;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -60,17 +64,25 @@ public class FormAddUpdateActivity extends AppCompatActivity {
         noteHelper = new NoteHelper(this);
         noteHelper.open();
 
-        note = getIntent().getParcelableExtra(EXTRA_NOTE);
+        Uri uri = getIntent().getData();
+        if(uri !=null){
+            Log.d("Check:URI",uri.toString());
+            Cursor cursor = getContentResolver().query(uri,null,null,null,null);
+            Log.d("Check:Cursor",cursor.toString());
+            if(cursor!=null){
+                if(cursor.moveToFirst()){
+                    note = new Note(cursor);
 
-        if(note!=null){
-            isEdit=true;
-            position = getIntent().getIntExtra(EXTRA_POSITION,0);
+                    cursor.close();
+                }
+            }
         }
 
         String actionBarTitle;
         String btnTitle;
 
-        if(isEdit){
+        if(note!=null){
+            isEdit=true;
             actionBarTitle = "Ubah";
             btnTitle = "Update";
             form.get(0).setText(note.getNoteTitle());
@@ -143,10 +155,8 @@ public class FormAddUpdateActivity extends AppCompatActivity {
                         if(isDialogClose){
                             finish();
                         }else{
-                            noteHelper.delete(note.getNoteID());
-                            Intent intent = new Intent();
-                            intent.putExtra(EXTRA_POSITION,position);
-                            setResult(RESULT_DELETE,intent);
+                            getContentResolver().delete(getIntent().getData(),null,null);
+                            setResult(RESULT_DELETE);
                             finish();
                         }
                     }
@@ -177,23 +187,17 @@ public class FormAddUpdateActivity extends AppCompatActivity {
         }
 
         if(!isEmpty){
-            Note newNote = new Note();
-            newNote.setNoteTitle(title);
-            newNote.setNoteDesc(description);
-
-            Intent intent = new Intent();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DatabaseContract.NotesColumns.TITLE,title);
+            contentValues.put(DatabaseContract.NotesColumns.DESCRIPTION,description);
 
             if(isEdit){
-                note.setNoteTitle(title);
-                note.setNoteDesc(description);
-                note.setNoteDate(getCurrentDate());
-                noteHelper.update(note);
-                intent.putExtra(EXTRA_POSITION,position);
-                setResult(RESULT_UPDATE,intent);
+                getContentResolver().update(getIntent().getData(),contentValues,null,null);
+                setResult(RESULT_UPDATE);
                 finish();
             }else{
-                newNote.setNoteDate(getCurrentDate());
-                noteHelper.insert(newNote);
+                contentValues.put(DatabaseContract.NotesColumns.DATE,getCurrentDate());
+                getContentResolver().insert(DatabaseContract.CONTENT_URI,contentValues);
                 setResult(RESULT_ADD);
                 finish();
             }

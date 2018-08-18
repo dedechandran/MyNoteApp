@@ -1,6 +1,7 @@
 package com.example.genjeh.mynoteapp;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab_add)
     FloatingActionButton fabAdd;
 
-    private ArrayList<Note> listNote;
+    private Cursor listNote;
     private NoteAdapter noteAdapter;
     private NoteHelper noteHelper;
 
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        listNote = new ArrayList<>();
+
         noteHelper = new NoteHelper(this);
         noteHelper.open();
 
@@ -66,10 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 new LoadNoteAsync().execute();
                 showSnackBar("Satu item berhasil diubah");
             }else if(resultCode == FormAddUpdateActivity.RESULT_DELETE){
-                int position = data.getIntExtra(FormAddUpdateActivity.EXTRA_POSITION,0);
-                listNote.remove(position);
-                noteAdapter.setListNote(listNote);
-                noteAdapter.notifyDataSetChanged();
+                new LoadNoteAsync().execute();
                 showSnackBar("Satu item berhasil dihapus");
             }
         }
@@ -83,29 +81,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class LoadNoteAsync extends AsyncTask<Void,Void,ArrayList<Note>>{
+    private class LoadNoteAsync extends AsyncTask<Void,Void,Cursor>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(listNote.size()>0){
-                listNote.clear();
-            }
+
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Note> notes) {
-            super.onPostExecute(notes);
-            listNote.addAll(notes);
+        protected void onPostExecute(Cursor cursor) {
+            super.onPostExecute(cursor);
+            listNote = cursor;
             noteAdapter.setListNote(listNote);
             noteAdapter.notifyDataSetChanged();
-            if(listNote.size()==0){
+            if(listNote.getCount()==0){
                 showSnackBar("tidak ada data saat ini");
             }
         }
 
         @Override
-        protected ArrayList<Note> doInBackground(Void... voids) {
-            return noteHelper.query();
+        protected Cursor doInBackground(Void... voids) {
+            return getContentResolver().query(DatabaseContract.CONTENT_URI,null,null,null,null);
         }
     }
 

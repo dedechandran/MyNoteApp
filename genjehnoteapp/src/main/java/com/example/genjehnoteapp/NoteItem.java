@@ -1,16 +1,16 @@
-package com.example.genjeh.mynoteapp;
+package com.example.genjehnoteapp;
 
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Note implements Parcelable {
+public class NoteItem implements Parcelable {
     private int noteID;
     private String noteTitle;
     private String noteDesc;
     private String noteDate;
 
-    public Note(Cursor cursor){
+    public NoteItem (Cursor cursor){
         this.noteID = DatabaseContract.getColumnInt(cursor,DatabaseContract.NotesColumns._ID);
         this.noteTitle = DatabaseContract.getColumnString(cursor,DatabaseContract.NotesColumns.TITLE);
         this.noteDesc = DatabaseContract.getColumnString(cursor,DatabaseContract.NotesColumns.DESCRIPTION);
@@ -62,25 +62,22 @@ public class Note implements Parcelable {
         dest.writeString(this.noteDate);
     }
 
-    public Note() {
-    }
-
-    protected Note(Parcel in) {
+    protected NoteItem(Parcel in) {
         this.noteID = in.readInt();
         this.noteTitle = in.readString();
         this.noteDesc = in.readString();
         this.noteDate = in.readString();
     }
 
-    public static final Parcelable.Creator<Note> CREATOR = new Parcelable.Creator<Note>() {
+    public static final Parcelable.Creator<NoteItem> CREATOR = new Parcelable.Creator<NoteItem>() {
         @Override
-        public Note createFromParcel(Parcel source) {
-            return new Note(source);
+        public NoteItem createFromParcel(Parcel source) {
+            return new NoteItem(source);
         }
 
         @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
+        public NoteItem[] newArray(int size) {
+            return new NoteItem[size];
         }
     };
 }

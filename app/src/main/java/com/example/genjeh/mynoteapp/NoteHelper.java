@@ -67,4 +67,26 @@ public class NoteHelper {
         contentValues.put(DatabaseContract.NotesColumns.DATE,note.getNoteDate());
         return database.update(DatabaseContract.TABLE_NAME,contentValues,DatabaseContract.NotesColumns._ID + " = '"+note.getNoteID()+"'",null);
     }
+
+    public Cursor queryByIdProvider(String id){
+        return database.query(DatabaseContract.TABLE_NAME,null,DatabaseContract.NotesColumns._ID + " = ?" , new String[]{id},null,null,null,null);
+    }
+
+    public Cursor queryProvider(){
+        return database.query(DatabaseContract.TABLE_NAME,null,null ,null,null,null,DatabaseContract.NotesColumns._ID + " DESC",null);
+    }
+
+    public long insertProvider(ContentValues contentValues){
+        return database.insert(DatabaseContract.TABLE_NAME,null,contentValues);
+    }
+
+    public int updateProvider(String id,ContentValues contentValues){
+        return database.update(DatabaseContract.TABLE_NAME,contentValues,DatabaseContract.NotesColumns._ID + " = ?",new String[]{id});
+    }
+
+    public int deleteProvider(String id){
+        return database.delete(DatabaseContract.TABLE_NAME,DatabaseContract.NotesColumns._ID + " = ?",new String[]{id});
+    }
+
+
 }

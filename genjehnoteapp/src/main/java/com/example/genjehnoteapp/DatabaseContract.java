@@ -1,4 +1,4 @@
-package com.example.genjeh.mynoteapp;
+package com.example.genjehnoteapp;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,7 +12,7 @@ public class DatabaseContract {
       " %s TEXT NOT NULL,"+
       " %s TEXT NOT NULL,"+
       " %s TEXT NOT NULL);"
-            ,TABLE_NAME,NotesColumns._ID,NotesColumns.TITLE,NotesColumns.DESCRIPTION,NotesColumns.DATE
+            ,TABLE_NAME, NotesColumns._ID, NotesColumns.TITLE, NotesColumns.DESCRIPTION, NotesColumns.DATE
     );
 
     public static final class NotesColumns implements BaseColumns {

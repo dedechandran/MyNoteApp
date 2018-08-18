@@ -3,6 +3,8 @@ package com.example.genjeh.mynoteapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -20,17 +22,13 @@ import butterknife.ButterKnife;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder>{
     private Activity activity;
-    private ArrayList<Note> listNote = new ArrayList<>();
+    private Cursor listNote ;
 
     public NoteAdapter(Activity activity) {
         this.activity = activity;
     }
 
-    public ArrayList<Note> getListNote() {
-        return listNote;
-    }
-
-    public void setListNote(ArrayList<Note> listNote) {
+    public void setListNote(Cursor listNote) {
         this.listNote = listNote;
     }
 
@@ -45,15 +43,16 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull NoteViewHolder holder, int position) {
-        holder.viewList.get(0).setText(getListNote().get(position).getNoteDate());
-        holder.viewList.get(1).setText(getListNote().get(position).getNoteTitle());
-        holder.viewList.get(2).setText(getListNote().get(position).getNoteDesc());
+        final Note note = getItem(position);
+        holder.viewList.get(0).setText(note.getNoteDate());
+        holder.viewList.get(1).setText(note.getNoteTitle());
+        holder.viewList.get(2).setText(note.getNoteDesc());
         holder.cvNote.setOnClickListener(new OnCustomClickListener(position, new OnCustomClickListener.OnItemClickListener() {
             @Override
             public void OnItemClicked(int position, View view) {
                 Intent intent = new Intent(activity,FormAddUpdateActivity.class);
-                intent.putExtra(FormAddUpdateActivity.EXTRA_NOTE,getListNote().get(position));
-                intent.putExtra(FormAddUpdateActivity.EXTRA_POSITION,position);
+                Uri uri = Uri.parse(DatabaseContract.CONTENT_URI+"/"+note.getNoteID());
+                intent.setData(uri);
                 activity.startActivityForResult(intent,FormAddUpdateActivity.REQUEST_UPDATE);
             }
         }));
@@ -61,7 +60,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
 
     @Override
     public int getItemCount() {
-        return getListNote().size();
+        if(listNote== null){
+            return 0;
+        }
+        return listNote.getCount();
+    }
+
+    private Note getItem(int position){
+        if(!listNote.moveToPosition(position)){
+            throw new IllegalStateException("Position invalid");
+        }
+        return new Note(listNote);
     }
 
     class NoteViewHolder extends RecyclerView.ViewHolder {
